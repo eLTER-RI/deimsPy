@@ -64,7 +64,7 @@ def getSiteById(site_id):
 def normaliseDeimsID(deims_id):
     # extract ID from lowercased string via regex
     # returns the first match only
-    normalised_deims_id = re.search(r"/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})",deims_id.lower())
+    normalised_deims_id = re.search(r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})",deims_id.lower())
     if normalised_deims_id:
         return normalised_deims_id.group(1)
     else:
