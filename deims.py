@@ -6,14 +6,16 @@ import json
 import re
 
 
-# Get all site records on DEIMS-SDR and return a list of IDs.
-#
-# network argument must be the ID of a network. If provided, only sites
-# from that network are returned.
-#
-# verified_only argument must be a boolean - if True, only returned
-# verified members of the network.
 def getListOfSites(network=None,verified_only=False):
+    """Get all site records on DEIMS-SDR and return a list of IDs.
+
+    'network' must be the ID of a network. If provided, only sites from
+    that network are returned. Defaults to None.
+
+    'verified_only' must be a boolean. If True, only verified members of
+    the network are returned. Ignored if 'network' not supplied.
+    Defaults to False.
+    """
     csv.field_size_limit(sys.maxsize)
     
     # set API URL based on input
@@ -23,11 +25,11 @@ def getListOfSites(network=None,verified_only=False):
         else:
             url = f"https://deims.org/api/sites?format=csv&network={network}"
     else:
-        url ="https://deims.org/api/sites?format=csv"
+        url = "https://deims.org/api/sites?format=csv"
 
     # connect to DEIMS REST-API
     csv_stream = urllib.request.urlopen(url)
-    csvfile = csv.reader(codecs.iterdecode(csv_stream, 'utf-8'),  delimiter=';')
+    csvfile = csv.reader(codecs.iterdecode(csv_stream, 'utf-8'), delimiter=';')
     next(csvfile) # ignore first row
 
     # load all site records into one object
@@ -39,9 +41,13 @@ def getListOfSites(network=None,verified_only=False):
     return list_of_sites
 
 
-# Get complete record of site with ID site_id and return as a
-# dictionary.
 def getSiteById(site_id):
+    """Get complete record of site with ID site_id and return as a
+    dictionary.
+
+    'site_id' is the only, mandatory argument and must be a valid DEIMS
+    ID.
+    """
     # make sure we have a well-formed deims_id suffix
     deims_id_suffix = normaliseDeimsID(site_id)
     
@@ -59,9 +65,11 @@ def getSiteById(site_id):
     return parsed_site_json
 
 
-# Extract standardised ID from input. Returns ID as string of the form
-# 00000000-0000-0000-0000-000000000000
 def normaliseDeimsID(deims_id):
+    """Extract standardised ID from input string. Returns ID as string
+    of the form '00000000-0000-0000-0000-000000000000' or raises
+    RuntimeError if no ID found.
+    """
     # extract ID from lowercased string via regex
     # returns the first match only
     normalised_deims_id = re.search(r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})",deims_id.lower())
