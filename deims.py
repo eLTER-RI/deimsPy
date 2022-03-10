@@ -80,7 +80,7 @@ def normaliseDeimsID(deims_id):
     else:
         raise RuntimeError("no ID found")
 
- def getSitesWithinRadius(lat, lon, distance):
+def getSitesWithinRadius(lat, lon, distance):
     """Get all site records on DEIMS-SDR that are within a given radius.
     It returns a list of sites consisting the DEIMS.iD and the distance to the input coordinates in meters  
     """
