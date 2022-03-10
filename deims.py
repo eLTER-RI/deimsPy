@@ -108,4 +108,4 @@ def getSitesWithinRadius(lat, lon, distance):
                 continue
         return sorted(results, key=lambda x: x[1])
     else: 
-        raise RuntimeError("no results")
+        return None
