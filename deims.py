@@ -4,6 +4,8 @@ import codecs
 import sys
 import json
 import re
+import geopandas
+import geopy.distance
 
 
 def getListOfSites(network=None,verified_only=False):
@@ -77,3 +79,33 @@ def normaliseDeimsID(deims_id):
         return normalised_deims_id.group(1)
     else:
         raise RuntimeError("no ID found")
+
+ def getSitesWithinRadius(lat, lon, distance):
+    """Get all site records on DEIMS-SDR that are within a given radius.
+    It returns a list of sites consisting the DEIMS.iD and the distance to the input coordinates in meters  
+    """
+
+    gdf = geopandas.GeoDataFrame(
+            df, geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
+        )
+
+    bounding_box = gdf.geometry.buffer(distance).to_crs(4326).bounds
+
+    bounding_box_string = str(bounding_box['miny'][0]) + ',' + str(bounding_box['minx'][0]) +  ',' + str(bounding_box['maxy'][0]) +  ',' + str(bounding_box['maxx'][0])
+    query_string = 'https://deims.org/geoserver/deims/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=deims%3Adeims_all_sites&outputFormat=application%2Fjson&srsName=EPSG:3857&bbox=' + bounding_box_string + ',urn:ogc:def:crs:EPSG:4326'
+
+    # open URL and parse as json
+    with urllib.request.urlopen(query_string) as f:
+        parsed_results_json = json.loads(f.read().decode("utf-8"))
+
+    if parsed_results_json['totalFeatures']>0:
+        results = [];
+        for site in parsed_results_json['features']:
+            current_distance = geopy.distance.geodesic((lat,lon),(site['properties']['field_coordinates_lat'],site['properties']['field_coordinates_lon']))
+            if (current_distance < distance):
+                results.append([normaliseDeimsID(site['properties']['deimsid']), round(current_distance.meters)])
+            else:
+                continue
+        return sorted(results, key=lambda x: x[1])
+    else: 
+        raise RuntimeError("no results")
