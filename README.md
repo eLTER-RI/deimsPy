@@ -25,4 +25,4 @@ Get a particular site record by its DEIMS.iD (multiple formats of the deims.iD a
 
 Get all sites on DEIMS within a given search radius (in metres)<br>
 - getSitesWithinRadius(lat, lon, distance)
-- getSitesWithinRadius(16, 48, 10000)
+- getSitesWithinRadius(47.84, 14.44, 30000)
