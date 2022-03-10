@@ -22,3 +22,7 @@ Get the list of all network sites (verified and not verified), e.g. LTER Austria
 Get a particular site record by its DEIMS.iD (multiple formats of the deims.iD are accepted)<br>
 - getSiteById("deims.org/8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")<br>
 - getSiteById("8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")
+
+Get all sites on DEIMS within a given search radius (in metres)<br>
+- getSitesWithinRadius(lat, lon, distance)
+- getSitesWithinRadius(16, 48, 10000)
