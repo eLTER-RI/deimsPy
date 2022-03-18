@@ -6,23 +6,23 @@ For further information about DEIMS-SDR, please refer to its About page (www.dei
 
 ## Installation
 
-Via pip (see the package on [PyPI](https://pypi.org/project/deims/)): `pip install deims`.<br>
+Via pip (see the package on [PyPI](https://pypi.org/project/deims/)): `pip install deims`.
 Manually: download `deims.py` to working directory.
 
 You can then `import deims` as normal.
 
 ## Usage
 
-Get the list of all verified site of a network, e.g. ECN<br>
+Get the list of all verified site of a network, e.g. ECN
 - getListOfSites(network="a197664f-569e-4df6-933a-86de676dbfc5",verified_only=True)
 
-Get the list of all network sites (verified and not verified), e.g. LTER Austria<br>
+Get the list of all network sites (verified and not verified), e.g. LTER Austria
 - getListOfSites(network="d45c2690-dbef-4dbc-a742-26ea846edf28")
 
-Get a particular site record by its DEIMS.iD (multiple formats of the deims.iD are accepted)<br>
-- getSiteById("deims.org/8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")<br>
+Get a particular site record by its DEIMS.iD (multiple formats of the deims.iD are accepted)
+- getSiteById("deims.org/8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")
 - getSiteById("8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")
 
-Get all sites on DEIMS within a given search radius (in metres)<br>
+Get all sites on DEIMS within a given search radius (in metres)
 - getSitesWithinRadius(lat, lon, distance)
 - getSitesWithinRadius(47.84, 14.44, 30000)

@@ -1,9 +1,10 @@
-import csv
-import urllib.request
 import codecs
-import sys
+import csv
 import json
 import re
+import sys
+import urllib.request
+
 import geopandas
 import geopy.distance
 
@@ -19,7 +20,7 @@ def getListOfSites(network=None,verified_only=False):
     Defaults to False.
     """
     csv.field_size_limit(sys.maxsize)
-    
+
     # set API URL based on input
     if network is not None:
         if verified_only:
@@ -52,17 +53,17 @@ def getSiteById(site_id):
     """
     # make sure we have a well-formed deims_id suffix
     deims_id_suffix = normaliseDeimsID(site_id)
-    
+
     # construct URL
     site_json_url = "https://deims.org/api/sites/" + deims_id_suffix
-    
+
     # open URL and parse as json
     with urllib.request.urlopen(site_json_url) as f:
         parsed_site_json = json.loads(f.read().decode("utf-8"))
-    
+
     # optional processing steps
     # ...
-    
+
     # returns entire site records as dict
     return parsed_site_json
 
@@ -80,11 +81,12 @@ def normaliseDeimsID(deims_id):
     else:
         raise RuntimeError("no ID found")
 
-def getSitesWithinRadius(lat, lon, distance):
-    """Get all site records on DEIMS-SDR that are within a given radius.
-    It returns a list of sites consisting the DEIMS.iD and the distance to the input coordinates in meters  
-    """
 
+def getSitesWithinRadius(lat, lon, distance):
+    """Get all site records on DEIMS-SDR that are within a given radius
+    of a point. Returns a list of sites consisting of the DEIMS.iD
+    and the distance to the input coordinates in meters.
+    """
     gdf = geopandas.GeoDataFrame(
             df, geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
         )
@@ -107,5 +109,5 @@ def getSitesWithinRadius(lat, lon, distance):
             else:
                 continue
         return sorted(results, key=lambda x: x[1])
-    else: 
+    else:
         return None
