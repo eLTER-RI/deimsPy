@@ -86,7 +86,7 @@ def getSitesWithinRadius(lat, lon, distance):
     """
 
     gdf = geopandas.GeoDataFrame(
-            df, geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
+            geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
         )
 
     bounding_box = gdf.geometry.buffer(distance).to_crs(4326).bounds
