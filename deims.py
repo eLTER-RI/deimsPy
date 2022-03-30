@@ -1,3 +1,18 @@
+"""A module for interacting with the DEIMS-SDR API.
+
+The three main functions exported are:
+    - getListOfSites
+    - getSiteById
+    - getSitesWithinRadius
+
+A fourth function normaliseDeimsID is provided but should not normally
+be needed by end users, as other functions already call it when needed.
+
+See the respective functions' help or the README for more
+information.
+"""
+
+
 import codecs
 import csv
 import json
@@ -10,7 +25,7 @@ import geopy.distance
 
 
 def getListOfSites(network=None,verified_only=False):
-    """Get all site records on DEIMS-SDR and return a list of IDs.
+    """Get all site records on DEIMS-SDR and return a list of DEIMS.IDs.
 
     'network' must be the ID of a network. If provided, only sites from
     that network are returned. Defaults to None.
@@ -45,13 +60,12 @@ def getListOfSites(network=None,verified_only=False):
 
 
 def getSiteById(site_id):
-    """Get complete record of site with ID site_id and return as a
-    dictionary.
+    """Get complete record of a site and return as a dictionary.
 
-    'site_id' is the only, mandatory argument and must be a valid DEIMS
-    ID.
+    'site_id' is the only, mandatory argument and must be a valid
+    DEIMS.ID.
     """
-    # make sure we have a well-formed deims_id suffix
+    # make sure we have a well-formed DEIMS.ID suffix
     deims_id_suffix = normaliseDeimsID(site_id)
 
     # construct URL
@@ -69,9 +83,13 @@ def getSiteById(site_id):
 
 
 def normaliseDeimsID(deims_id):
-    """Extract standardised ID from input string. Returns ID as string
-    of the form '00000000-0000-0000-0000-000000000000' or raises
-    RuntimeError if no ID found.
+    """Extract standardised DEIMS.ID suffix from input string.
+
+    'deims_id' is the only, mandatory argument and must be a valid
+    DEIMS.ID.
+
+    Returns a string of the form '00000000-0000-0000-0000-000000000000'
+    or raises a RuntimeError if no DEIMS.ID suffix is found.
     """
     # extract ID from lowercased string via regex
     # returns the first match only
@@ -83,16 +101,23 @@ def normaliseDeimsID(deims_id):
 
 
 def getSitesWithinRadius(lat, lon, distance):
-    """Get all site records on DEIMS-SDR that are within a given radius
-    of a point. Returns a list of sites consisting of the DEIMS.iD
-    and the distance to the input coordinates in meters.
+    """Get all sites within a given distance of a point.
+
+    'lat' and 'lon' should be coordinates in degrees describing a point
+    to search from.
+
+    'distance' should be the number of metres from the point to search.
+
+    Returns a list of (DEIMS.ID, distance to input coordinates in
+    meters) tuples or None if no sites are found.
     """
+    # construct GeoDataFrame from input coordinates
     gdf = geopandas.GeoDataFrame(
             geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
         )
 
+    # construct query URL from bounding box centred on input point
     bounding_box = gdf.geometry.buffer(distance).to_crs(4326).bounds
-
     bounding_box_string = str(bounding_box['miny'][0]) + ',' + str(bounding_box['minx'][0]) +  ',' + str(bounding_box['maxy'][0]) +  ',' + str(bounding_box['maxx'][0])
     query_string = 'https://deims.org/geoserver/deims/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=deims%3Adeims_all_sites&outputFormat=application%2Fjson&srsName=EPSG:3857&bbox=' + bounding_box_string + ',urn:ogc:def:crs:EPSG:4326'
 
@@ -101,6 +126,7 @@ def getSitesWithinRadius(lat, lon, distance):
         parsed_results_json = json.loads(f.read().decode("utf-8"))
 
     if parsed_results_json['totalFeatures']>0:
+        # sites were returned but need distance checking still
         results = [];
         for site in parsed_results_json['features']:
             current_distance = geopy.distance.geodesic((lat,lon),(site['properties']['field_coordinates_lat'],site['properties']['field_coordinates_lon']))
@@ -110,4 +136,5 @@ def getSitesWithinRadius(lat, lon, distance):
                 continue
         return sorted(results, key=lambda x: x[1])
     else:
+        # no sites returned
         return None
