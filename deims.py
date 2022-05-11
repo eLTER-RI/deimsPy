@@ -1,15 +1,15 @@
 """A module for interacting with the DEIMS-SDR API.
 
-The three main functions exported are:
+The four main functions exported are:
     - getListOfSites
     - getSiteById
     - getSitesWithinRadius
+    - getSiteBoundaries
 
-A fourth function normaliseDeimsID is provided but should not normally
-be needed by end users, as other functions already call it when needed.
+A fifth function normaliseDeimsID is provided but should not normally be
+needed by end users, as other functions already call it when needed.
 
-See the respective functions' help or the README for more
-information.
+See the respective functions' help or the README for more information.
 """
 
 
@@ -22,6 +22,7 @@ import urllib.request
 
 import geopandas
 import geopy.distance
+import pandas
 
 
 def getListOfSites(network=None,verified_only=False):
@@ -138,3 +139,32 @@ def getSitesWithinRadius(lat, lon, distance):
     else:
         # no sites returned
         return None
+
+
+def getSiteBoundaries(site_ids, filename=None):
+    """Get all available boundaries for one or more sites.
+
+    'site_ids' can either be a string featuring the DEIMS.ID or a
+    list of ids as returned by other functions in this package.
+
+    If 'filename' is provided, output will be saved as a shapefile.
+    Otherwise, it is returned as a GeoDataFrame.
+    """
+
+    # ensure input is a list
+    if isinstance(site_ids, str):
+        site_ids = [site_ids]
+
+    # initialise GeoDataFrame
+    list_of_boundaries = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry')
+
+    # get boundaries
+    for site_id in site_ids:
+        current_boundary = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_sites_boundaries&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP")
+        list_of_boundaries = pandas.concat([list_of_boundaries, current_boundary])
+
+    # save file
+    if (filename):
+        list_of_boundaries.to_file(filename + ".shp")
+    else:
+        return list_of_boundaries
