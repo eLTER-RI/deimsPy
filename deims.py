@@ -1,14 +1,11 @@
 """A module for interacting with the DEIMS-SDR API.
-
 The four main functions exported are:
     - getListOfSites
     - getSiteById
     - getSitesWithinRadius
     - getSiteBoundaries
-
 A fifth function normaliseDeimsID is provided but should not normally be
 needed by end users, as other functions already call it when needed.
-
 See the respective functions' help or the README for more information.
 """
 
@@ -27,15 +24,13 @@ import pandas
 
 def getListOfSites(network=None,verified_only=False):
     """Get all site records on DEIMS-SDR and return a list of DEIMS.IDs.
-
     'network' must be the ID of a network. If provided, only sites from
     that network are returned. Defaults to None.
-
     'verified_only' must be a boolean. If True, only verified members of
     the network are returned. Ignored if 'network' not supplied.
     Defaults to False.
     """
-    csv.field_size_limit(sys.maxsize)
+    csv.field_size_limit(2 ** 31 - 1)
 
     # set API URL based on input
     if network is not None:
@@ -62,7 +57,6 @@ def getListOfSites(network=None,verified_only=False):
 
 def getSiteById(site_id):
     """Get complete record of a site and return as a dictionary.
-
     'site_id' is the only, mandatory argument and must be a valid
     DEIMS.ID.
     """
@@ -85,10 +79,8 @@ def getSiteById(site_id):
 
 def normaliseDeimsID(deims_id):
     """Extract standardised DEIMS.ID suffix from input string.
-
     'deims_id' is the only, mandatory argument and must be a valid
     DEIMS.ID.
-
     Returns a string of the form '00000000-0000-0000-0000-000000000000'
     or raises a RuntimeError if no DEIMS.ID suffix is found.
     """
@@ -103,12 +95,9 @@ def normaliseDeimsID(deims_id):
 
 def getSitesWithinRadius(lat, lon, distance):
     """Get all sites within a given distance of a point.
-
     'lat' and 'lon' should be coordinates in degrees describing a point
     to search from.
-
     'distance' should be the number of metres from the point to search.
-
     Returns a list of (DEIMS.ID, distance to input coordinates in
     meters) tuples or None if no sites are found.
     """
@@ -116,7 +105,7 @@ def getSitesWithinRadius(lat, lon, distance):
     gdf = geopandas.GeoDataFrame(
             geometry=geopandas.points_from_xy(x=[lon], y=[lat], crs="EPSG:4326").to_crs(3857)
         )
-
+    
     # construct query URL from bounding box centred on input point
     bounding_box = gdf.geometry.buffer(distance).to_crs(4326).bounds
     bounding_box_string = str(bounding_box['miny'][0]) + ',' + str(bounding_box['minx'][0]) +  ',' + str(bounding_box['maxy'][0]) +  ',' + str(bounding_box['maxx'][0])
@@ -143,10 +132,8 @@ def getSitesWithinRadius(lat, lon, distance):
 
 def getSiteBoundaries(site_ids, filename=None):
     """Get all available boundaries for one or more sites.
-
     'site_ids' can either be a string featuring the DEIMS.ID or a
     list of ids as returned by other functions in this package.
-
     If 'filename' is provided, output will be saved as a shapefile.
     Otherwise, it is returned as a GeoDataFrame.
     """
@@ -156,11 +143,11 @@ def getSiteBoundaries(site_ids, filename=None):
         site_ids = [site_ids]
 
     # initialise GeoDataFrame
-    list_of_boundaries = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry')
-
+    list_of_boundaries = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry').set_crs(4326)
+    
     # get boundaries
     for site_id in site_ids:
-        current_boundary = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_sites_boundaries&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP")
+        current_boundary = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_sites_boundaries&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
         list_of_boundaries = pandas.concat([list_of_boundaries, current_boundary])
 
     # save file
