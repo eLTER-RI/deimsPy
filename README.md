@@ -32,8 +32,10 @@ Get all sites on DEIMS within 30km of latitude 47.84, longitude 14.44
 Get all sites on DEIMS within 1500m of latitude 57.08, longitude -3.667
 - deims.getSitesWithinRadius(57.08,-3.667,1500)
 
-Get the boundaries of a particular site as a GeoDataFrame
+Get the coordinates or boundaries of a particular site as a GeoDataFrame
+- deims.getSiteCoordinates("8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")
 - deims.getSiteBoundaries("8eda49e9-1f4e-4f3e-b58e-e0bb25dc32a6")
 
-Get the boundaries of multiple sites and save them as a shapefile called "lter-austria.shp"
+Get the coordinates boundaries of multiple sites and save them as a shapefile called "lter-austria.shp"
+- deims.getSiteCoordinates(deims.getListOfSites("d45c2690-dbef-4dbc-a742-26ea846edf28"),"lter-austria")
 - deims.getSiteBoundaries(deims.getListOfSites("d45c2690-dbef-4dbc-a742-26ea846edf28"),"lter-austria")
