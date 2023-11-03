@@ -155,3 +155,30 @@ def getSiteBoundaries(site_ids, filename=None):
         list_of_boundaries.to_file(filename + ".shp")
     else:
         return list_of_boundaries
+
+
+def getSiteCoordinates(site_ids, filename=None):
+    """Get all available coordinates for one or more sites.
+    'site_ids' can either be a string featuring the DEIMS.ID or a
+    list of ids as returned by other functions in this package.
+    If 'filename' is provided, output will be saved as a shapefile.
+    Otherwise, it is returned as a GeoDataFrame.
+    """
+
+    # ensure input is a list
+    if isinstance(site_ids, str):
+        site_ids = [site_ids]
+
+    # initialise GeoDataFrame
+    list_of_coordinates = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry').set_crs(4326)
+    
+    # get boundaries
+    for site_id in site_ids:
+        current_coordinates = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_qa_sites&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
+        list_of_coordinates = pandas.concat([list_of_coordinates, current_coordinates])
+
+    # save file
+    if (filename):
+        list_of_coordinates.to_file(filename + ".shp")
+    else:
+        return list_of_coordinates
