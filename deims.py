@@ -1,11 +1,11 @@
 """A module for interacting with the DEIMS-SDR API.
-The four main functions exported are:
+The main functions exported are:
     - getListOfSites
     - getSiteById
     - getSitesWithinRadius
     - getSiteBoundaries
-A fifth function normaliseDeimsID is provided but should not normally be
-needed by end users, as other functions already call it when needed.
+    - getSiteCoordinates
+
 See the respective functions' help or the README for more information.
 """
 
@@ -61,7 +61,7 @@ def getSiteById(site_id):
     DEIMS.ID.
     """
     # make sure we have a well-formed DEIMS.ID suffix
-    deims_id_suffix = normaliseDeimsID(site_id)
+    deims_id_suffix = _normaliseDeimsID(site_id)
 
     # construct URL
     site_json_url = "https://deims.org/api/sites/" + deims_id_suffix
@@ -77,7 +77,7 @@ def getSiteById(site_id):
     return parsed_site_json
 
 
-def normaliseDeimsID(deims_id):
+def _normaliseDeimsID(deims_id):
     """Extract standardised DEIMS.ID suffix from input string.
     'deims_id' is the only, mandatory argument and must be a valid
     DEIMS.ID.
@@ -121,7 +121,7 @@ def getSitesWithinRadius(lat, lon, distance):
         for site in parsed_results_json['features']:
             current_distance = geopy.distance.geodesic((lat,lon),(site['properties']['field_coordinates_lat'],site['properties']['field_coordinates_lon']))
             if (current_distance < distance):
-                results.append([normaliseDeimsID(site['properties']['deimsid']), round(current_distance.meters)])
+                results.append([_normaliseDeimsID(site['properties']['deimsid']), round(current_distance.meters)])
             else:
                 continue
         return sorted(results, key=lambda x: x[1])
@@ -147,7 +147,7 @@ def getSiteBoundaries(site_ids, filename=None):
     
     # get boundaries
     for site_id in site_ids:
-        current_boundary = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_sites_boundaries&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
+        current_boundary = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_sites_boundaries&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + _normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
         list_of_boundaries = pandas.concat([list_of_boundaries, current_boundary])
 
     # save file
@@ -172,9 +172,9 @@ def getSiteCoordinates(site_ids, filename=None):
     # initialise GeoDataFrame
     list_of_coordinates = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry').set_crs(4326)
     
-    # get boundaries
+    # get coordinates
     for site_id in site_ids:
-        current_coordinates = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_qa_sites&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
+        current_coordinates = geopandas.read_file("https://deims.org/geoserver/deims/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=deims:deims_qa_sites&srsName=EPSG:4326&CQL_FILTER=deimsid=%27https://deims.org/" + _normaliseDeimsID(site_id) + "%27&outputFormat=SHAPE-ZIP").to_crs(4326)
         list_of_coordinates = pandas.concat([list_of_coordinates, current_coordinates])
 
     # save file
