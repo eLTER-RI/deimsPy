@@ -143,7 +143,12 @@ def getSiteBoundaries(site_ids, filename=None):
         site_ids = [site_ids]
 
     # initialise GeoDataFrame
-    list_of_boundaries = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry').set_crs(4326)
+    list_of_boundaries = geopandas.GeoDataFrame({
+        'name': pandas.Series(),
+        'deimsid': pandas.Series(),
+        'field_elev': pandas.Series(dtype=float),
+        'geometry': pandas.Series()
+        }).set_crs(4326)
     
     # get boundaries
     for site_id in site_ids:
@@ -170,7 +175,14 @@ def getSiteCoordinates(site_ids, filename=None):
         site_ids = [site_ids]
 
     # initialise GeoDataFrame
-    list_of_coordinates = geopandas.GeoDataFrame(columns=['name', 'deimsid', 'field_elev', 'geometry'], geometry='geometry').set_crs(4326)
+    list_of_coordinates = geopandas.GeoDataFrame({
+        'name': pandas.Series(),
+        'deimsid': pandas.Series(),
+        'field_elev': pandas.Series(dtype=float),
+        'field_coor': pandas.Series(dtype=float),
+        'field_coo0': pandas.Series(dtype=float),
+        'geometry': pandas.Series()
+        }).set_crs(4326)
     
     # get coordinates
     for site_id in site_ids:
