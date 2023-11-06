@@ -158,7 +158,7 @@ def getSiteBoundaries(site_ids, filename=None):
 
 
 def getSiteCoordinates(site_ids, filename=None):
-    """Get all available coordinates for one or more sites.
+    """Get centroid or representative coordinates for one or more sites.
     'site_ids' can either be a string featuring the DEIMS.ID or a
     list of ids as returned by other functions in this package.
     If 'filename' is provided, output will be saved as a shapefile.
