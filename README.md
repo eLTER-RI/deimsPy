@@ -13,7 +13,7 @@ You can then `import deims` as normal.
 
 ## Usage
 
-Get the list of all verified site of a network, e.g. ECN
+Get the list of all verified sites of a network, e.g. ECN
 - deims.getListOfSites(network="a197664f-569e-4df6-933a-86de676dbfc5",verified_only=True)
 
 Get the list of all network sites (verified and not verified), e.g. LTER Austria
